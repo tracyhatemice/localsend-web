@@ -10,6 +10,11 @@ ENV BASE_PATH=${BASE_PATH}
 ARG BASE_URL=https://web.localsend.org
 ENV BASE_URL=${BASE_URL}
 
+# Signaling server WebSocket URL baked into the generated bundle.
+# Override with `--build-arg SIGNALING_URL=wss://example.org/send/v1/ws`.
+ARG SIGNALING_URL=wss://public.localsend.org/v1/ws
+ENV SIGNALING_URL=${SIGNALING_URL}
+
 WORKDIR /data
 
 COPY ./ /data
