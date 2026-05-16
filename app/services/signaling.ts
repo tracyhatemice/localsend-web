@@ -12,6 +12,7 @@ export class SignalingConnection {
    * Connects to the signaling server.
    * @param url The URL of the signaling server.
    * @param info The client info to send to the server.
+   * @param room Optional room code. When set, peers with the same code form one visibility group regardless of IP family. Omit/null/empty for the default IP-based grouping.
    * @param onMessage The callback to call when a message is received.
    * @param generateNewInfo The function to generate and publish a new info.
    * @param onClose The callback to call when the connection is closed.
@@ -19,12 +20,14 @@ export class SignalingConnection {
   public static async connect({
     url,
     info,
+    room,
     onMessage,
     generateNewInfo,
     onClose,
   }: {
     url: string;
     info: ClientInfoWithoutId;
+    room?: string | null;
     onMessage: OnMessageCallback;
     generateNewInfo: () => Promise<ClientInfoWithoutId>;
     onClose: () => void;
@@ -32,8 +35,11 @@ export class SignalingConnection {
     console.log(`Connecting to ${url}`);
 
     const encodedInfo = encodeStringToBase64(JSON.stringify(info));
+    const qs = room
+      ? `d=${encodedInfo}&room=${encodeURIComponent(room)}`
+      : `d=${encodedInfo}`;
     const socket = await new Promise<WebSocket>((resolve, reject) => {
-      const ws = new WebSocket(`${url}?d=${encodedInfo}`);
+      const ws = new WebSocket(`${url}?${qs}`);
       ws.onopen = () => resolve(ws);
       ws.onerror = (err) => reject(err);
     });
@@ -105,6 +111,10 @@ export class SignalingConnection {
         resolve();
       });
     });
+  }
+
+  public close(): void {
+    this._socket.close();
   }
 }
 

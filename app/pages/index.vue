@@ -35,6 +35,20 @@
             {{ store.pin ?? t("index.pin.none") }}
           </span>
         </div>
+
+        <div
+          class="inline-block h-12 w-[2px] bg-gray-300 dark:bg-gray-700 mx-4"
+        ></div>
+
+        <div class="pr-2">
+          <span>
+            {{ t("index.room.label") }}
+          </span>
+          <br />
+          <span class="font-bold cursor-pointer" @click="updateRoom">
+            {{ store.room ?? t("index.room.none") }}
+          </span>
+        </div>
       </div>
     </div>
 
@@ -83,10 +97,12 @@ import {
   startSendSession,
   store,
   updateAliasState,
+  setRoom,
 } from "@/services/store";
 import { getAgentInfoString } from "~/utils/userAgent";
 import { protocolVersion } from "~/services/webrtc";
 import { generateRandomAlias } from "~/utils/alias";
+import { isValidRoomCode } from "~/utils/room";
 import { useFileDialog } from "@vueuse/core";
 import SessionDialog from "~/components/dialog/SessionDialog.vue";
 import {
@@ -165,6 +181,21 @@ const updatePIN = async () => {
   }
 };
 
+const updateRoom = async () => {
+  const input = prompt(t("index.enterRoom"), store.room ?? "");
+  if (input === null) return; // user cancelled
+  const trimmed = input.trim();
+  if (trimmed === "") {
+    setRoom(null);
+    return;
+  }
+  if (!isValidRoomCode(trimmed)) {
+    alert(t("index.room.invalid"));
+    return;
+  }
+  setRoom(trimmed);
+};
+
 onMounted(async () => {
   webCryptoSupported.value = isWebCryptoSupported();
 
@@ -195,6 +226,12 @@ onMounted(async () => {
     deviceType: PeerDeviceType.web,
     token: token,
   };
+
+  const params = new URLSearchParams(window.location.search);
+  const initialRoom = params.get("room");
+  if (initialRoom && isValidRoomCode(initialRoom)) {
+    store.room = initialRoom;
+  }
 
   await setupConnection({
     url: runtimeConfig.public.signalingUrl,
