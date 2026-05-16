@@ -44,6 +44,9 @@ export const store = reactive({
   /// PIN code used before receiving or sending files
   pin: null as string | null,
 
+  /// Room code for peer grouping (null = use IP-based grouping).
+  room: null as string | null,
+
   // Signaling connection to the server
   signaling: null as SignalingConnection | null,
 
@@ -85,6 +88,7 @@ async function connectionLoop(url: string) {
       store.signaling = await SignalingConnection.connect({
         url: url,
         info: store._proposingClient!,
+        room: store.room,
         onMessage: (data: WsServerMessage) => {
           switch (data.type) {
             case "HELLO":
@@ -134,6 +138,16 @@ async function connectionLoop(url: string) {
 export function updateAliasState(alias: string) {
   store._proposingClient!.alias = alias;
   store.client!.alias = alias;
+}
+
+/**
+ * Update the room code and force a signaling reconnect so the new value
+ * takes effect. Pass null or an empty string to clear (= IP-based grouping).
+ */
+export function setRoom(room: string | null) {
+  store.room = room && room.length > 0 ? room : null;
+  // Close the current socket; connectionLoop will reconnect with the new room.
+  store.signaling?.close();
 }
 
 function updateClientTokenState(token: string) {

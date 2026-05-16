@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "none"
     },
+    "room": {
+      "label": "Room",
+      "none": "none",
+      "invalid": "Invalid room code. Use 4-64 of A-Z, a-z, 0-9, _ or -."
+    },
     "enterAlias": "Enter name",
     "enterPin": "Enter PIN",
+    "enterRoom": "Enter room code (4-64 chars, letters/numbers/_-):",
     "progress": {
       "titleSending": "Sending files...",
       "titleReceiving": "Receiving files..."
