@@ -19,18 +19,24 @@ WORKDIR /data
 
 COPY ./ /data
 
-RUN corepack enable pnpm && \
+RUN corepack enable && \
+    corepack prepare pnpm@10.32.0 --activate && \
     pnpm install && \
+    pnpm approve-builds @parcel/watcher esbuild && \
     pnpm run generate
 
 FROM caddy:alpine
 ARG BASE_PATH=/send/
 COPY --from=builder /data/.output/public /usr/share/caddy${BASE_PATH}
-COPY <<"EOT" /etc/caddy/Caddyfile
+# Use an unquoted heredoc so ${BASE_PATH} is expanded at build time.
+# try_files gives an SPA fallback to Nuxt's generated 200.html for routes
+# that aren't pre-rendered (e.g. non-default i18n locales like /send/de).
+RUN cat > /etc/caddy/Caddyfile <<EOF
 :80 {
     root * /usr/share/caddy
     encode zstd gzip
+    try_files {path} {path}.html {path}/index.html ${BASE_PATH}200.html
     file_server
 }
-EOT
+EOF
 EXPOSE 80
