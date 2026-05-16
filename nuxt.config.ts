@@ -1,4 +1,16 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+
+// Normalize BASE_PATH so it always starts and ends with a slash.
+// Set via `BASE_PATH=/send/` (env var) or by editing the default below to
+// serve the app under a sub-path such as `https://example.org/send/`.
+const rawBasePath = process.env.BASE_PATH ?? "/";
+const withLeading = rawBasePath.startsWith("/") ? rawBasePath : `/${rawBasePath}`;
+const baseURL = withLeading.endsWith("/") ? withLeading : `${withLeading}/`;
+
+// Public origin used for SEO canonical/hreflang links (no trailing slash).
+// Override with `BASE_URL=https://example.org`.
+const i18nBaseUrl = (process.env.BASE_URL ?? "https://web.localsend.org").replace(/\/+$/, "");
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-11-01",
   modules: [
@@ -15,22 +27,23 @@ export default defineNuxtConfig({
     },
   },
   app: {
+    baseURL,
     head: {
       link: [
         {
           rel: "icon",
-          href: "/favicon.ico",
+          href: `${baseURL}favicon.ico`,
         },
         {
           rel: "apple-touch-icon",
           sizes: "180x180",
-          href: "/apple-touch-icon.png",
+          href: `${baseURL}apple-touch-icon.png`,
         },
       ],
     },
   },
   i18n: {
-    baseUrl: "https://web.localsend.org",
+    baseUrl: i18nBaseUrl,
     strategy: "prefix_except_default",
     defaultLocale: "en",
     locales: [
@@ -130,17 +143,17 @@ export default defineNuxtConfig({
       short_name: "LocalSend",
       theme_color: "#111827",
       background_color: "#111827",
-      scope: "/",
+      scope: baseURL,
       id: "localsend",
-      start_url: "/?pwa=1",
+      start_url: `${baseURL}?pwa=1`,
       icons: [
         {
-          src: "apple-touch-icon.png",
+          src: `${baseURL}apple-touch-icon.png`,
           sizes: "180x180",
           type: "image/png",
         },
         {
-          src: "logo-512.png",
+          src: `${baseURL}logo-512.png`,
           sizes: "512x512",
           type: "image/png",
           purpose: "any maskable",
@@ -149,7 +162,7 @@ export default defineNuxtConfig({
     },
     workbox: {
       globPatterns: ["/", "**/*.{js,css,html,png,svg,ico}"],
-      navigateFallback: "/",
+      navigateFallback: baseURL,
       runtimeCaching: [
         {
           urlPattern: /^https:\/\/api\.iconify\.design\/.*'/i,
@@ -169,8 +182,10 @@ export default defineNuxtConfig({
     devOptions: {
       enabled: true,
       suppressWarnings: true,
-      navigateFallback: "/",
-      navigateFallbackAllowlist: [/^\/$/],
+      navigateFallback: baseURL,
+      navigateFallbackAllowlist: [
+        new RegExp(`^${baseURL.replace(/[/\-\\^$*+?.()|[\]{}]/g, "\\$&")}$`),
+      ],
       type: "module",
     },
   },
