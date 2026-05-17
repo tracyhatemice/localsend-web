@@ -24,17 +24,23 @@ export const defaultIceServers: RTCIceServer[] = [
 /**
  * Build the ICE server list for a PeerConnection.
  *
- * Fetches `/v1/turn-creds` from the signaling server. The server returns a
- * fully-formed `RTCIceServer[]` derived from its STUN_URL / TURN_URL env
- * vars; the client uses it verbatim. On 404 or fetch error, falls back to
- * `defaultIceServers`.
+ * Fetches `/v1/turn-creds?peer_id=<id>` from the signaling server. The
+ * endpoint requires an active WebSocket session (the peer_id must be
+ * registered in the server's tx_map), so this should only be called after
+ * the signaling HELLO has populated `store.client.id`.
+ *
+ * Returns the server-provided `iceServers` verbatim, or falls back to
+ * `defaultIceServers` on any failure (no peerId, 4xx, network error, etc.).
  */
 export async function buildIceServers(
   turnCredsUrl: string | null,
+  peerId: string | null,
 ): Promise<RTCIceServer[]> {
-  if (!turnCredsUrl) return defaultIceServers;
+  if (!turnCredsUrl || !peerId) return defaultIceServers;
   try {
-    const res = await fetch(turnCredsUrl, { cache: "no-store" });
+    const url = new URL(turnCredsUrl);
+    url.searchParams.set("peer_id", peerId);
+    const res = await fetch(url.toString(), { cache: "no-store" });
     if (!res.ok) return defaultIceServers;
     const data = (await res.json()) as { iceServers: RTCIceServer[] };
     return data.iceServers.length > 0 ? data.iceServers : defaultIceServers;
