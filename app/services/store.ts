@@ -153,9 +153,23 @@ export function updateAliasState(alias: string) {
 /**
  * Update the room code and force a signaling reconnect so the new value
  * takes effect. Pass null or an empty string to clear (= IP-based grouping).
+ * Also mirrors the value into the URL's `?room=` param so refresh and URL
+ * sharing keep the room.
  */
 export function setRoom(room: string | null) {
   store.room = room && room.length > 0 ? room : null;
+
+  // Reflect the room in the URL (replaceState — no back-button entry).
+  if (typeof window !== "undefined") {
+    const url = new URL(window.location.href);
+    if (store.room) {
+      url.searchParams.set("room", store.room);
+    } else {
+      url.searchParams.delete("room");
+    }
+    history.replaceState(null, "", url.toString());
+  }
+
   // Close the current socket; connectionLoop will reconnect with the new room.
   store.signaling?.close();
 }
