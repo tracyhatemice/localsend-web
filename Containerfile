@@ -12,6 +12,10 @@ ENV BASE_URL=${BASE_URL}
 
 # Signaling server WebSocket URL baked into the generated bundle.
 # Override with `--build-arg SIGNALING_URL=wss://example.org/send/v1/ws`.
+#
+# TURN credentials are fetched at runtime from the signaling server's
+# /v1/turn-creds endpoint (HMAC time-limited), so no TURN-specific build
+# args are needed here.
 ARG SIGNALING_URL=wss://public.localsend.org/v1/ws
 ENV SIGNALING_URL=${SIGNALING_URL}
 

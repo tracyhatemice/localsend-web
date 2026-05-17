@@ -11,11 +11,57 @@ import { generateClientTokenFromNonce } from "~/services/crypto";
 
 export const protocolVersion = "2.3";
 
-export const defaultStun = ["stun:stun.l.google.com:19302"];
+export const defaultIceServers: RTCIceServer[] = [
+  { urls: ["stun:stun.l.google.com:19302"] },
+];
+
+/**
+ * Fetch HMAC-time-limited TURN credentials from the signaling server's
+ * `/v1/turn-creds` endpoint and return them as an `RTCIceServer`.
+ * Returns `null` if TURN isn't configured on the server (404) or if the
+ * fetch fails — callers should fall back to STUN-only.
+ */
+export async function fetchTurnCredentials(
+  turnCredsUrl: string,
+): Promise<RTCIceServer | null> {
+  try {
+    const res = await fetch(turnCredsUrl, { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = (await res.json()) as {
+      urls: string[];
+      username: string;
+      credential: string;
+    };
+    return {
+      urls: data.urls,
+      username: data.username,
+      credential: data.credential,
+    };
+  } catch (e) {
+    console.warn("Failed to fetch TURN credentials:", e);
+    return null;
+  }
+}
+
+/**
+ * Build the ICE server list for a PeerConnection. Always includes STUN;
+ * appends a TURN server with fresh HMAC credentials when `turnCredsUrl`
+ * is set and the server returns them.
+ */
+export async function buildIceServers(
+  turnCredsUrl: string | null,
+): Promise<RTCIceServer[]> {
+  const list: RTCIceServer[] = [...defaultIceServers];
+  if (turnCredsUrl) {
+    const turn = await fetchTurnCredentials(turnCredsUrl);
+    if (turn) list.push(turn);
+  }
+  return list;
+}
 
 export async function sendFiles({
   signaling,
-  stunServers,
+  iceServers,
   fileDtoList,
   fileMap,
   targetId,
@@ -26,7 +72,7 @@ export async function sendFiles({
   onFileProgress,
 }: {
   signaling: SignalingConnection;
-  stunServers: string[];
+  iceServers: RTCIceServer[];
   fileDtoList: FileDto[];
   fileMap: Record<string, File>;
   targetId: string;
@@ -39,7 +85,7 @@ export async function sendFiles({
   console.log("Sending to target:", targetId);
   console.log("Sending files:", fileDtoList);
 
-  const peerConnection = await createPeerConnection(stunServers);
+  const peerConnection = await createPeerConnection(iceServers);
 
   const dataChannel = peerConnection.createDataChannel("data");
   dataChannel.binaryType = "arraybuffer";
@@ -299,7 +345,7 @@ export async function sendFiles({
 
 export async function receiveFiles({
   signaling,
-  stunServers,
+  iceServers,
   offer,
   signingKey,
   pin,
@@ -308,7 +354,7 @@ export async function receiveFiles({
   onFileProgress,
 }: {
   signaling: SignalingConnection;
-  stunServers: string[];
+  iceServers: RTCIceServer[];
   offer: WsServerSdpMessage;
   signingKey: CryptoKeyPair;
   pin?: PinConfig;
@@ -319,7 +365,7 @@ export async function receiveFiles({
   console.log("Accepting offer from:", offer.peer.id);
   console.log("Remote SDP: ", decodeSdp(offer.sdp));
 
-  const peerConnection = await createPeerConnection(stunServers);
+  const peerConnection = await createPeerConnection(iceServers);
 
   const dataChannelPromise = new Promise<RTCDataChannel>((resolve) => {
     peerConnection.ondatachannel = (event) => {
@@ -559,17 +605,10 @@ export async function receiveFiles({
 }
 
 async function createPeerConnection(
-  stunServers: string[],
+  iceServers: RTCIceServer[],
 ): Promise<RTCPeerConnection> {
   const peerConnection = new RTCPeerConnection({
-    iceServers:
-      stunServers.length === 0
-        ? undefined
-        : [
-            {
-              urls: stunServers,
-            },
-          ],
+    iceServers: iceServers.length === 0 ? undefined : iceServers,
   });
 
   peerConnection.onicecandidateerror = (event) => {
