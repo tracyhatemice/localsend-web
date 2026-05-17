@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "nessuno"
     },
+    "room": {
+      "label": "Stanza: ",
+      "none": "nessuna",
+      "invalid": "Codice stanza non valido. Usa 4-64 caratteri tra A-Z, a-z, 0-9, _ o -."
+    },
     "enterAlias": "Inserisci nome",
     "enterPin": "Inserisci PIN",
+    "enterRoom": "Inserisci il codice della stanza (4-64 caratteri, lettere/numeri/_-):",
     "progress": {
       "titleSending": "Invio file in corso...",
       "titleReceiving": "Ricezione file in corso..."

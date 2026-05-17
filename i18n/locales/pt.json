@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "nenhum"
     },
+    "room": {
+      "label": "Sala: ",
+      "none": "nenhuma",
+      "invalid": "Código de sala inválido. Use 4-64 caracteres de A-Z, a-z, 0-9, _ ou -."
+    },
     "enterAlias": "Digite o nome",
     "enterPin": "Digite o PIN",
+    "enterRoom": "Digite o código da sala (4-64 caracteres, letras/números/_-):",
     "progress": {
       "titleSending": "Enviando arquivos...",
       "titleReceiving": "Recebendo arquivos..."

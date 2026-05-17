@@ -15,8 +15,14 @@
       "label": "PIN: ",
       "none": "없음"
     },
+    "room": {
+      "label": "방: ",
+      "none": "없음",
+      "invalid": "올바르지 않은 방 코드입니다. A-Z, a-z, 0-9, _ 또는 - 중에서 4-64자를 사용하세요."
+    },
     "enterAlias": "이름 입력",
     "enterPin": "PIN 입력",
+    "enterRoom": "방 코드 입력 (4-64자, 영문/숫자/_-):",
     "progress": {
       "titleSending": "파일 전송중...",
       "titleReceiving": "파일 받는중..."

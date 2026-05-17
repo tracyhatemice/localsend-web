@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "未设置"
     },
+    "room": {
+      "label": "房间: ",
+      "none": "未设置",
+      "invalid": "房间号无效。请使用 4-64 个 A-Z、a-z、0-9、_ 或 - 字符。"
+    },
     "enterAlias": "设置本机名称",
     "enterPin": "设置 PIN",
+    "enterRoom": "设置房间号（4-64 字符，字母/数字/_-）：",
     "progress": {
       "titleSending": "发送文件中...",
       "titleReceiving": "文件接收中..."
