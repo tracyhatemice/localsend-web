@@ -11,52 +11,37 @@ import { generateClientTokenFromNonce } from "~/services/crypto";
 
 export const protocolVersion = "2.3";
 
+/**
+ * Fallback ICE servers used when the signaling deployment hasn't configured
+ * its own (i.e. /v1/turn-creds returns 404). Public Google STUN, no TURN.
+ * A self-hosted deployment that sets STUN_URL/TURN_URL on the signaling
+ * server overrides this entirely via the endpoint.
+ */
 export const defaultIceServers: RTCIceServer[] = [
   { urls: ["stun:stun.l.google.com:19302"] },
 ];
 
 /**
- * Fetch HMAC-time-limited TURN credentials from the signaling server's
- * `/v1/turn-creds` endpoint and return them as an `RTCIceServer`.
- * Returns `null` if TURN isn't configured on the server (404) or if the
- * fetch fails — callers should fall back to STUN-only.
- */
-export async function fetchTurnCredentials(
-  turnCredsUrl: string,
-): Promise<RTCIceServer | null> {
-  try {
-    const res = await fetch(turnCredsUrl, { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = (await res.json()) as {
-      urls: string[];
-      username: string;
-      credential: string;
-    };
-    return {
-      urls: data.urls,
-      username: data.username,
-      credential: data.credential,
-    };
-  } catch (e) {
-    console.warn("Failed to fetch TURN credentials:", e);
-    return null;
-  }
-}
-
-/**
- * Build the ICE server list for a PeerConnection. Always includes STUN;
- * appends a TURN server with fresh HMAC credentials when `turnCredsUrl`
- * is set and the server returns them.
+ * Build the ICE server list for a PeerConnection.
+ *
+ * Fetches `/v1/turn-creds` from the signaling server. The server returns a
+ * fully-formed `RTCIceServer[]` derived from its STUN_URL / TURN_URL env
+ * vars; the client uses it verbatim. On 404 or fetch error, falls back to
+ * `defaultIceServers`.
  */
 export async function buildIceServers(
   turnCredsUrl: string | null,
 ): Promise<RTCIceServer[]> {
-  const list: RTCIceServer[] = [...defaultIceServers];
-  if (turnCredsUrl) {
-    const turn = await fetchTurnCredentials(turnCredsUrl);
-    if (turn) list.push(turn);
+  if (!turnCredsUrl) return defaultIceServers;
+  try {
+    const res = await fetch(turnCredsUrl, { cache: "no-store" });
+    if (!res.ok) return defaultIceServers;
+    const data = (await res.json()) as { iceServers: RTCIceServer[] };
+    return data.iceServers.length > 0 ? data.iceServers : defaultIceServers;
+  } catch (e) {
+    console.warn("Failed to fetch ICE config, using defaults:", e);
+    return defaultIceServers;
   }
-  return list;
 }
 
 export async function sendFiles({
