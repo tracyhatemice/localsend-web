@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "yok"
     },
+    "room": {
+      "label": "Oda: ",
+      "none": "yok",
+      "invalid": "Geçersiz oda kodu. A-Z, a-z, 0-9, _ veya - karakterlerinden 4-64 tane kullanın."
+    },
     "enterAlias": "Ad girin",
     "enterPin": "PIN girin",
+    "enterRoom": "Oda kodu girin (4-64 karakter, harf/rakam/_-):",
     "progress": {
       "titleSending": "Dosyalar gönderiliyor...",
       "titleReceiving": "Dosyalar alınıyor..."

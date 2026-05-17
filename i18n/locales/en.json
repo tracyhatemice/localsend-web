@@ -17,7 +17,7 @@
       "none": "none"
     },
     "room": {
-      "label": "Room",
+      "label": "Room: ",
       "none": "none",
       "invalid": "Invalid room code. Use 4-64 of A-Z, a-z, 0-9, _ or -."
     },

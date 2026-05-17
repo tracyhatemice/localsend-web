@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "nincs"
     },
+    "room": {
+      "label": "Szoba: ",
+      "none": "nincs",
+      "invalid": "Érvénytelen szobakód. Használj 4-64 karaktert A-Z, a-z, 0-9, _ vagy - közül."
+    },
     "enterAlias": "Adj meg egy nevet:",
     "enterPin": "Adj meg egy PIN-kódot:",
+    "enterRoom": "Adj meg egy szobakódot (4-64 karakter, betűk/számok/_-):",
     "progress": {
       "titleSending": "Fájlok küldése folyamatban...",
       "titleReceiving": "Fájlok fogadása folyamatban..."

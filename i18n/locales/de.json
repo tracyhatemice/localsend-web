@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "keine"
     },
+    "room": {
+      "label": "Raum: ",
+      "none": "kein",
+      "invalid": "Ungültiger Raumcode. Verwende 4-64 Zeichen aus A-Z, a-z, 0-9, _ oder -."
+    },
     "enterAlias": "Name eingeben",
     "enterPin": "PIN eingeben",
+    "enterRoom": "Raumcode eingeben (4-64 Zeichen, Buchstaben/Zahlen/_-):",
     "progress": {
       "titleSending": "Sende Dateien...",
       "titleReceiving": "Empfange Dateien..."

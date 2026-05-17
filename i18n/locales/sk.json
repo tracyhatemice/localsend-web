@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "žiadny"
     },
+    "room": {
+      "label": "Miestnosť: ",
+      "none": "žiadna",
+      "invalid": "Neplatný kód miestnosti. Použite 4-64 znakov z A-Z, a-z, 0-9, _ alebo -."
+    },
     "enterAlias": "Zadajte meno",
     "enterPin": "Zadajte PIN",
+    "enterRoom": "Zadajte kód miestnosti (4-64 znakov, písmená/čísla/_-):",
     "progress": {
       "titleSending": "Odosielanie súborov...",
       "titleReceiving": "Prijímanie súborov..."

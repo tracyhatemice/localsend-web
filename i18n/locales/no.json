@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "ingen"
     },
+    "room": {
+      "label": "Rom: ",
+      "none": "ingen",
+      "invalid": "Ugyldig romkode. Bruk 4-64 av A-Z, a-z, 0-9, _ eller -."
+    },
     "enterAlias": "Skriv inn navn",
     "enterPin": "Skriv inn PIN",
+    "enterRoom": "Skriv inn romkode (4-64 tegn, bokstaver/tall/_-):",
     "progress": {
       "titleSending": "Sender filer...",
       "titleReceiving": "Mottar filer..."
