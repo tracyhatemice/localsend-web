@@ -233,9 +233,25 @@ onMounted(async () => {
     store.room = initialRoom;
   }
 
+  // Derive the TURN-credentials endpoint from the signaling URL.
+  //   wss://host/send/v1/ws  →  https://host/send/v1/turn-creds
+  // The server returns 404 if TURN isn't configured on this deployment,
+  // in which case the client transparently falls back to STUN-only.
+  const signalingUrl = runtimeConfig.public.signalingUrl;
+  let turnCredsUrl: string | null = null;
+  try {
+    const u = new URL(signalingUrl);
+    u.protocol = u.protocol === "wss:" ? "https:" : "http:";
+    u.pathname = u.pathname.replace(/\/v1\/ws\/?$/, "/v1/turn-creds");
+    turnCredsUrl = u.toString();
+  } catch (e) {
+    console.warn("Could not derive TURN creds URL from", signalingUrl, e);
+  }
+
   await setupConnection({
-    url: runtimeConfig.public.signalingUrl,
+    url: signalingUrl,
     info,
+    turnCredsUrl,
     onPin: async () => {
       return prompt(t("index.enterPin"));
     },

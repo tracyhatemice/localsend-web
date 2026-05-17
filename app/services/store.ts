@@ -6,7 +6,7 @@ import type {
 } from "~/services/signaling";
 import { SignalingConnection } from "~/services/signaling";
 import {
-  defaultStun,
+  buildIceServers,
   type FileDto,
   type FileProgress,
   receiveFiles,
@@ -47,6 +47,11 @@ export const store = reactive({
   /// Room code for peer grouping (null = use IP-based grouping).
   room: null as string | null,
 
+  /// URL of the signaling server's TURN-credential endpoint.
+  /// When set, fresh HMAC-time-limited TURN credentials are fetched before
+  /// each PeerConnection. When null, STUN-only.
+  _turnCredsUrl: null as string | null,
+
   // Signaling connection to the server
   signaling: null as SignalingConnection | null,
 
@@ -68,14 +73,19 @@ export const store = reactive({
 export async function setupConnection({
   url,
   info,
+  turnCredsUrl,
   onPin,
 }: {
   url: string;
   info: ClientInfoWithoutId;
+  /// URL of the signaling server's `/v1/turn-creds` endpoint. When set,
+  /// fresh HMAC TURN credentials are fetched before each transfer.
+  turnCredsUrl?: string | null;
   onPin: () => Promise<string | null>;
 }) {
   store._proposingClient = info;
   store._onPin = onPin;
+  store._turnCredsUrl = turnCredsUrl ?? null;
   if (!store._loopStarted) {
     store._loopStarted = true;
     connectionLoop(url).then(() => console.log("Connection loop ended"));
@@ -189,10 +199,12 @@ export async function startSendSession({
   store.session.curr = 0;
   store.session.total = fileDtoList.reduce((acc, file) => acc + file.size, 0);
 
+  const iceServers = await buildIceServers(store._turnCredsUrl);
+
   try {
     await sendFiles({
       signaling: store.signaling as SignalingConnection,
-      stunServers: defaultStun,
+      iceServers,
       fileDtoList: fileDtoList,
       fileMap: fileMap,
       targetId: targetId,
@@ -238,10 +250,12 @@ export async function acceptOffer({
 }) {
   store.session.state = SessionState.receiving;
 
+  const iceServers = await buildIceServers(store._turnCredsUrl);
+
   try {
     await receiveFiles({
       signaling: store.signaling as SignalingConnection,
-      stunServers: defaultStun,
+      iceServers,
       offer: offer,
       signingKey: store.key!,
       pin: store.pin ? { pin: store.pin, maxTries: PIN_MAX_TRIES } : undefined,
