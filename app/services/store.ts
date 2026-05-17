@@ -199,7 +199,10 @@ export async function startSendSession({
   store.session.curr = 0;
   store.session.total = fileDtoList.reduce((acc, file) => acc + file.size, 0);
 
-  const iceServers = await buildIceServers(store._turnCredsUrl);
+  const iceServers = await buildIceServers(
+    store._turnCredsUrl,
+    store.client?.id ?? null,
+  );
 
   try {
     await sendFiles({
@@ -250,7 +253,10 @@ export async function acceptOffer({
 }) {
   store.session.state = SessionState.receiving;
 
-  const iceServers = await buildIceServers(store._turnCredsUrl);
+  const iceServers = await buildIceServers(
+    store._turnCredsUrl,
+    store.client?.id ?? null,
+  );
 
   try {
     await receiveFiles({
