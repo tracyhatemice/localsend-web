@@ -19,6 +19,10 @@ WORKDIR /data
 
 COPY ./ /data
 
+# pnpm needs a TTY to confirm recreating the modules directory; CI=true makes
+# it auto-confirm in the non-interactive Docker build.
+ENV CI=true
+
 RUN corepack enable && \
     corepack prepare pnpm@10.32.0 --activate && \
     pnpm install && \
