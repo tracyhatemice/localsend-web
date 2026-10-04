@@ -16,8 +16,14 @@
       "label": "PIN: ",
       "none": "なし"
     },
+    "room": {
+      "label": "ルーム: ",
+      "none": "なし",
+      "invalid": "無効なルームコードです。A-Z、a-z、0-9、_ または - を4〜64文字で使用してください。"
+    },
     "enterAlias": "名前を入力",
     "enterPin": "PINを入力",
+    "enterRoom": "ルームコードを入力（4〜64文字、英数字/_-）：",
     "progress": {
       "titleSending": "ファイルを送信中...",
       "titleReceiving": "ファイルを受信中..."
