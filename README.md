@@ -46,6 +46,8 @@ You can change this by setting the `SIGNALING_URL` environment variable during `
 
 To be fully self-hosted, you can also deploy your own [signaling server](https://github.com/localsend/localsend/tree/main/server).
 
+Icons are bundled into the client at build time from the `@iconify-json/material-symbols` package, so the app makes no requests to the Iconify API. Only icons referenced by their full name (e.g. `material-symbols:translate`) in the sources are picked up; a name assembled at runtime won't be bundled and renders blank.
+
 ### Serving under a sub-path
 
 By default the app is served at the domain root (`/`). To host it under a sub-path such as `https://example.org/send/`, set the `BASE_PATH` environment variable for both `dev` and `generate`:

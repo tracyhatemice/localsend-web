@@ -20,6 +20,15 @@ export default defineNuxtConfig({
     "@vite-pwa/nuxt",
   ],
   devtools: { enabled: true },
+  // Bundle the icons the app uses (found by scanning the sources) into the
+  // client from the locally installed @iconify-json/material-symbols,
+  // instead of fetching them from api.iconify.design at runtime.
+  icon: {
+    provider: "none",
+    fallbackToApi: false,
+    serverBundle: false,
+    clientBundle: { scan: true },
+  },
   runtimeConfig: {
     public: {
       signalingUrl:
@@ -175,18 +184,6 @@ export default defineNuxtConfig({
     workbox: {
       globPatterns: ["/", "**/*.{js,css,html,png,svg,ico}"],
       navigateFallback: baseURL,
-      runtimeCaching: [
-        {
-          urlPattern: /^https:\/\/api\.iconify\.design\/.*'/i,
-          handler: "CacheFirst",
-          options: {
-            cacheName: "icons",
-            expiration: {
-              maxEntries: 10,
-            },
-          },
-        },
-      ],
     },
     client: {
       installPrompt: true,
